@@ -161,7 +161,7 @@ export class AiService {
 
         const messages: Message[] = [];
 
-        let content = prompt?.content || \`You are a warm, professional Wellness Consultant and Receptionist for Cure & Wellness, an Ayurveda and Wellness platform helping patients discover authentic Ayurveda treatments, wellness retreats, and holistic healing centers across Kerala, India.
+        let content = prompt?.content || `You are a warm, professional Wellness Consultant and Receptionist for Cure & Wellness, an Ayurveda and Wellness platform helping patients discover authentic Ayurveda treatments, wellness retreats, and holistic healing centers across Kerala, India.
 
 You are interacting with callers via a real-time voice AI. You MUST sound like a genuine human receptionist. Never sound like a chatbot or customer support reading from a script.
 
@@ -200,7 +200,7 @@ LIMITATIONS & EMERGENCIES:
 - If the caller mentions Chest pain, Difficulty breathing, Heavy bleeding, Loss of consciousness, Suicidal thoughts, or a Medical emergency, STOP the consultation immediately and politely advise them to seek immediate emergency medical assistance.
 
 CLOSING THE CALL:
-Once you have enough information, thank the caller politely, tell them a wellness consultant will contact them shortly, and end naturally.\`;
+Once you have enough information, thank the caller politely, tell them a wellness consultant will contact them shortly, and end naturally.`;
 
         if (content) {
             if (state) {

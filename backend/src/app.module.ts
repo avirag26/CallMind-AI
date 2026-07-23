@@ -17,9 +17,28 @@ import { DatabaseModule } from './modules/database/database.module';
 import { QueueModule } from './modules/queue/queue.module';
 import { EventsModule } from './modules/events/events.module';
 import { VoiceModule } from './modules/voice/voice.module';
+import { TwilioModule } from './modules/twilio/twilio.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, OrganizationsModule, DoctorsModule, PatientsModule, CallsModule, AiModule, NotificationsModule, DashboardModule, HealthModule, CommonModule, ConfigModule, DatabaseModule, QueueModule, EventsModule, VoiceModule],
+  imports: [
+    AuthModule, 
+    UsersModule, 
+    OrganizationsModule, 
+    DoctorsModule, 
+    PatientsModule, 
+    CallsModule, 
+    AiModule, 
+    NotificationsModule, 
+    DashboardModule, 
+    HealthModule, 
+    CommonModule, 
+    ConfigModule, 
+    DatabaseModule, 
+    QueueModule, 
+    EventsModule, 
+    VoiceModule,
+    TwilioModule
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

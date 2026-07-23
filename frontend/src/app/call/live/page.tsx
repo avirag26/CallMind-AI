@@ -20,7 +20,8 @@ export default function LiveVoiceCallPage() {
 
   const handleStart = async () => {
     // Generate a fresh mock call ID for this live session
-    const res = await fetch('http://localhost:4000/calls/mock', {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    const res = await fetch(`${apiUrl}/calls/mock`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ phoneNumber: 'LIVE_WEB', patientName: 'Web Caller' })

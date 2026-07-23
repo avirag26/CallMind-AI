@@ -6,6 +6,7 @@ import { useVoiceCall } from '@/hooks/use-voice-call';
 export default function LiveVoiceCallPage() {
   const [callId, setCallId] = useState('');
   const [isStarted, setIsStarted] = useState(false);
+  const [isRinging, setIsRinging] = useState(false);
   
   const { 
     status, 
@@ -19,22 +20,34 @@ export default function LiveVoiceCallPage() {
   } = useVoiceCall(callId);
 
   const handleStart = async () => {
-    // Generate a fresh mock call ID for this live session
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-    const res = await fetch(`${apiUrl}/calls/mock`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phoneNumber: 'LIVE_WEB', patientName: 'Web Caller' })
-    });
-    const call = await res.json();
-    setCallId(call.id);
-    setIsStarted(true);
-    await connect();
+    setIsRinging(true);
+    
+    // Simulate phone ringing for 5 seconds
+    setTimeout(async () => {
+      setIsRinging(false);
+      
+      // Generate a fresh mock call ID for this live session
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+      const res = await fetch(`${apiUrl}/calls/mock`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phoneNumber: 'LIVE_WEB', patientName: 'Web Caller' })
+      });
+      const call = await res.json();
+      setCallId(call.id);
+      setIsStarted(true);
+      
+      // Wait for React to update state, then connect the socket
+      setTimeout(async () => {
+        await connect();
+      }, 500);
+    }, 10000);
   };
 
   const handleDisconnect = () => {
     disconnect();
     setIsStarted(false);
+    setIsRinging(false);
   };
 
   return (
@@ -46,11 +59,14 @@ export default function LiveVoiceCallPage() {
         </h1>
         <div className="flex items-center gap-3">
           <div className={`w-3 h-3 rounded-full animate-pulse ${
+            isRinging ? 'bg-emerald-400' :
             status === 'Listening' ? 'bg-emerald-500' :
             status === 'Thinking' ? 'bg-amber-500' :
             status === 'Speaking' ? 'bg-blue-500' : 'bg-red-500'
           }`} />
-          <span className="text-sm font-medium text-gray-300 uppercase tracking-wider">{status}</span>
+          <span className="text-sm font-medium text-gray-300 uppercase tracking-wider">
+            {isRinging ? 'RINGING' : status}
+          </span>
         </div>
       </header>
 
@@ -61,19 +77,24 @@ export default function LiveVoiceCallPage() {
           <div className="bg-gray-800/50 border border-gray-700 rounded-3xl p-8 flex-1 flex flex-col items-center justify-center relative overflow-hidden">
             {/* Ambient glowing orb effect based on status */}
             <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full blur-[100px] opacity-20 transition-all duration-700 ${
+              isRinging ? 'bg-emerald-400 animate-ping' :
               status === 'Listening' ? 'bg-emerald-500 scale-110' :
               status === 'Thinking' ? 'bg-amber-500 animate-pulse' :
               status === 'Speaking' ? 'bg-blue-500 scale-125' : 'bg-gray-500'
             }`} />
 
             <div className="z-10 text-center space-y-8">
-              {!isStarted ? (
+              {!isStarted && !isRinging ? (
                 <button 
                   onClick={handleStart}
                   className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full font-semibold text-lg transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(16,185,129,0.3)]"
                 >
                   Start Live Call
                 </button>
+              ) : isRinging ? (
+                <div className="text-2xl font-medium text-emerald-400 animate-pulse h-8">
+                  Ringing...
+                </div>
               ) : (
                 <>
                   <div className={`text-xl font-medium text-gray-300 h-8 ${status === 'Listening' ? 'animate-pulse' : ''}`}>

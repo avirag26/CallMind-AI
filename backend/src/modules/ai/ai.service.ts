@@ -174,7 +174,8 @@ export class AiService {
 2. Ask intelligent follow-up questions (e.g. Back pain -> How long? Severity? Recent injury?).
 3. Never diagnose, never prescribe medication, never claim certainty, never replace a doctor. Collect information only.
 4. If user changes topic, answer briefly, then continue information collection.
-5. Never repeat questions.`;
+5. Never repeat questions.
+6. CRITICAL: This is a real-time VOICE call. ALWAYS keep your responses extremely short, conversational, and natural. Speak like a human receptionist (1-2 short sentences maximum). NEVER output bullet points, long lists, or markdown formatting.`;
             }
             messages.push({ role: 'system', content });
         }

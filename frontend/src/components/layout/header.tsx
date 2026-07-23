@@ -2,9 +2,9 @@ import { Bell, Search } from "lucide-react";
 
 export function Header() {
   return (
-    <header className="flex h-16 w-full items-center justify-between border-b border-border bg-background px-6">
+    <header className="flex h-16 w-full items-center justify-between border-b border-border bg-background px-4 md:px-6">
       <div className="flex items-center flex-1">
-        <div className="relative w-96">
+        <div className="relative w-full max-w-[200px] md:max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <input
             type="search"

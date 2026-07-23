@@ -1,0 +1,171 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  STAFF
+  DOCTOR
+}
+
+model User {
+  id             String        @id @default(uuid())
+  email          String        @unique
+  password       String
+  name           String?
+  role           Role          @default(DOCTOR)
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  users     User[]
+  patients  Patient[]
+  calls     Call[]
+}
+
+model Patient {
+  id             String       @id @default(uuid())
+  firstName      String
+  lastName       String
+  phone          String
+  email          String?
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  calls          Call[]
+}
+
+model Call {
+  id             String         @id @default(uuid())
+  sid            String?
+  status         CallStatus     @default(RINGING)
+  phoneNumber    String?
+  patientName    String?
+  duration       Int?
+  startedAt      DateTime?
+  timeoutAt      DateTime?
+  patientId      String?
+  patient        Patient?       @relation(fields: [patientId], references: [id])
+  doctorId       String?
+  organizationId String?
+  organization   Organization?  @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @default(now()) @updatedAt
+  conversations  Conversation[]
+}
+
+model Conversation {
+  id        String                @id @default(uuid())
+  callId    String
+  createdAt DateTime              @default(now())
+  usages    AIUsage[]
+  call      Call                  @relation(fields: [callId], references: [id])
+  messages     ConversationMessage[]
+  summaries    ConversationSummary[]
+  qualityScore QualityScore?
+  doctorReport DoctorReport?
+}
+
+model ConversationMessage {
+  id             String       @id @default(uuid())
+  conversationId String
+  speaker        String
+  text           String
+  provider       String?
+  model          String?
+  extractedState Json?
+  intent         String?
+  createdAt      DateTime     @default(now())
+  usage          AIUsage?
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+}
+
+model ConversationSummary {
+  id                String       @id @default(uuid())
+  conversationId    String
+  patientName       String?
+  phone             String?
+  age               String?
+  gender            String?
+  concern           String?
+  symptoms          String?
+  duration          String?
+  urgency           String?
+  preferredCallback String?
+  additionalNotes   String?
+  shortSummary      String?
+  createdAt         DateTime     @default(now())
+  conversation      Conversation @relation(fields: [conversationId], references: [id])
+}
+
+model AIUsage {
+  id               String               @id @default(uuid())
+  conversationId   String
+  messageId        String?              @unique
+  promptTokens     Int                  @default(0)
+  completionTokens Int                  @default(0)
+  totalTokens      Int                  @default(0)
+  estimatedCost    Float                @default(0)
+  provider         String
+  model            String
+  createdAt        DateTime             @default(now())
+  conversation     Conversation         @relation(fields: [conversationId], references: [id])
+  message          ConversationMessage? @relation(fields: [messageId], references: [id])
+}
+
+model PromptTemplate {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  content   String
+  isActive  Boolean  @default(false)
+  version   Int      @default(1)
+  type      String   @default("SYSTEM")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model QualityScore {
+  id                String       @id @default(uuid())
+  conversationId    String       @unique
+  quality           String?
+  missingInfo       String?
+  confidence        String?
+  suggestedAction   String?
+  createdAt         DateTime     @default(now())
+  conversation      Conversation @relation(fields: [conversationId], references: [id])
+}
+
+model DoctorReport {
+  id                String       @id @default(uuid())
+  conversationId    String       @unique
+  patientSummary    String?
+  timeline          String?
+  priority          String?
+  callbackRec       String?
+  urgency           String?
+  createdAt         DateTime     @default(now())
+  conversation      Conversation @relation(fields: [conversationId], references: [id])
+}
+
+enum CallStatus {
+  RINGING
+  ANSWERED
+  MISSED
+  REJECTED
+  AI_ACTIVE
+  COMPLETED
+  FAILED
+}

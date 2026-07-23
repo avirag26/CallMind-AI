@@ -1,0 +1,81 @@
+import { PrismaService } from '../../database/prisma.service';
+import { Prisma, CallStatus } from '@prisma/client';
+export declare class CallsRepository {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
+    createCall(data: Prisma.CallCreateInput): Promise<{
+        id: string;
+        organizationId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        sid: string | null;
+        status: import("@prisma/client").$Enums.CallStatus;
+        phoneNumber: string | null;
+        patientName: string | null;
+        duration: number | null;
+        startedAt: Date | null;
+        timeoutAt: Date | null;
+        patientId: string | null;
+        doctorId: string | null;
+    }>;
+    findCallById(id: string): Promise<{
+        id: string;
+        organizationId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        sid: string | null;
+        status: import("@prisma/client").$Enums.CallStatus;
+        phoneNumber: string | null;
+        patientName: string | null;
+        duration: number | null;
+        startedAt: Date | null;
+        timeoutAt: Date | null;
+        patientId: string | null;
+        doctorId: string | null;
+    } | null>;
+    updateCallStatus(id: string, status: CallStatus): Promise<{
+        id: string;
+        organizationId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        sid: string | null;
+        status: import("@prisma/client").$Enums.CallStatus;
+        phoneNumber: string | null;
+        patientName: string | null;
+        duration: number | null;
+        startedAt: Date | null;
+        timeoutAt: Date | null;
+        patientId: string | null;
+        doctorId: string | null;
+    }>;
+    getActiveCalls(): Promise<{
+        id: string;
+        organizationId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        sid: string | null;
+        status: import("@prisma/client").$Enums.CallStatus;
+        phoneNumber: string | null;
+        patientName: string | null;
+        duration: number | null;
+        startedAt: Date | null;
+        timeoutAt: Date | null;
+        patientId: string | null;
+        doctorId: string | null;
+    }[]>;
+    getCallHistory(): Promise<{
+        id: string;
+        organizationId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        sid: string | null;
+        status: import("@prisma/client").$Enums.CallStatus;
+        phoneNumber: string | null;
+        patientName: string | null;
+        duration: number | null;
+        startedAt: Date | null;
+        timeoutAt: Date | null;
+        patientId: string | null;
+        doctorId: string | null;
+    }[]>;
+}

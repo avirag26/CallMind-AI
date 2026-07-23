@@ -9,10 +9,10 @@ export declare class AiController {
             id: string;
             createdAt: Date;
             conversationId: string;
-            speaker: string;
+            model: string | null;
             text: string;
             provider: string | null;
-            model: string | null;
+            speaker: string;
             extractedState: import("@prisma/client/runtime/client").JsonValue | null;
             intent: string | null;
         }[];

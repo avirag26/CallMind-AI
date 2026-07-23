@@ -20,7 +20,7 @@ exports.VoiceModule = VoiceModule;
 exports.VoiceModule = VoiceModule = __decorate([
     (0, common_1.Module)({
         imports: [ai_module_1.AiModule, calls_module_1.CallsModule],
-        providers: [voice_gateway_1.VoiceGateway, voice_service_1.VoiceService, deepgram_stt_provider_1.DeepgramSttProvider, kokoro_tts_provider_1.KokoroTtsProvider],
+        providers: [voice_gateway_1.VoiceGateway, voice_service_1.VoiceOrchestratorService, deepgram_stt_provider_1.DeepgramSttProvider, kokoro_tts_provider_1.KokoroTtsProvider],
     })
 ], VoiceModule);
 //# sourceMappingURL=voice.module.js.map

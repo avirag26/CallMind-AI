@@ -18,44 +18,44 @@ const websockets_1 = require("@nestjs/websockets");
 const socket_io_1 = require("socket.io");
 const common_1 = require("@nestjs/common");
 const voice_service_1 = require("./voice.service");
+const browser_transport_adapter_1 = require("./adapters/browser-transport.adapter");
 let VoiceGateway = VoiceGateway_1 = class VoiceGateway {
-    voiceService;
+    voiceOrchestrator;
     server;
     logger = new common_1.Logger(VoiceGateway_1.name);
-    constructor(voiceService) {
-        this.voiceService = voiceService;
+    adapters = new Map();
+    constructor(voiceOrchestrator) {
+        this.voiceOrchestrator = voiceOrchestrator;
     }
     handleConnection(client) {
         this.logger.log(`Client connected: ${client.id}`);
     }
     handleDisconnect(client) {
         this.logger.log(`Client disconnected: ${client.id}`);
-        const callId = client.data.callId;
-        if (callId) {
-            this.voiceService.endSession(callId);
+        const adapter = this.adapters.get(client.id);
+        if (adapter) {
+            adapter.pushEndSession();
+            this.adapters.delete(client.id);
         }
     }
     async handleStartSession(client, data) {
         const { callId } = data;
-        client.data.callId = callId;
-        await this.voiceService.startSession(callId, (audioBuffer) => {
-            client.emit('audio-chunk', audioBuffer);
-        }, (state) => {
-            client.emit('voice-state', state);
-        });
+        const adapter = new browser_transport_adapter_1.BrowserTransportAdapter(client);
+        this.adapters.set(client.id, adapter);
+        await this.voiceOrchestrator.attachTransport(callId, adapter);
         return { success: true };
     }
     handleAudioStream(client, chunk) {
-        const callId = client.data.callId;
-        if (callId) {
-            this.voiceService.handleAudioChunk(callId, chunk);
+        const adapter = this.adapters.get(client.id);
+        if (adapter) {
+            adapter.pushAudio(chunk);
         }
     }
     handleEndSession(client) {
-        const callId = client.data.callId;
-        if (callId) {
-            this.voiceService.endSession(callId);
-            client.data.callId = null;
+        const adapter = this.adapters.get(client.id);
+        if (adapter) {
+            adapter.pushEndSession();
+            this.adapters.delete(client.id);
         }
     }
 };
@@ -90,6 +90,6 @@ __decorate([
 ], VoiceGateway.prototype, "handleEndSession", null);
 exports.VoiceGateway = VoiceGateway = VoiceGateway_1 = __decorate([
     (0, websockets_1.WebSocketGateway)({ namespace: '/voice', cors: { origin: '*' } }),
-    __metadata("design:paramtypes", [voice_service_1.VoiceService])
+    __metadata("design:paramtypes", [voice_service_1.VoiceOrchestratorService])
 ], VoiceGateway);
 //# sourceMappingURL=voice.gateway.js.map

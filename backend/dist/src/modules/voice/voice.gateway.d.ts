@@ -1,11 +1,12 @@
 import { OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { VoiceService } from './voice.service';
+import { VoiceOrchestratorService } from './voice.service';
 export declare class VoiceGateway implements OnGatewayConnection, OnGatewayDisconnect {
-    private readonly voiceService;
+    private readonly voiceOrchestrator;
     server: Server;
     private readonly logger;
-    constructor(voiceService: VoiceService);
+    private adapters;
+    constructor(voiceOrchestrator: VoiceOrchestratorService);
     handleConnection(client: Socket): void;
     handleDisconnect(client: Socket): void;
     handleStartSession(client: Socket, data: {

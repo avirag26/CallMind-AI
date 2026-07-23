@@ -9,7 +9,8 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
-import { VoiceService } from './voice.service';
+import { VoiceOrchestratorService } from './voice.service';
+import { BrowserTransportAdapter } from './adapters/browser-transport.adapter';
 
 @WebSocketGateway({ namespace: '/voice', cors: { origin: '*' } })
 export class VoiceGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -17,8 +18,11 @@ export class VoiceGateway implements OnGatewayConnection, OnGatewayDisconnect {
   server: Server;
   
   private readonly logger = new Logger(VoiceGateway.name);
+  
+  // Track adapters by Socket ID
+  private adapters = new Map<string, BrowserTransportAdapter>();
 
-  constructor(private readonly voiceService: VoiceService) {}
+  constructor(private readonly voiceOrchestrator: VoiceOrchestratorService) {}
 
   handleConnection(client: Socket) {
     this.logger.log(`Client connected: ${client.id}`);
@@ -26,9 +30,10 @@ export class VoiceGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected: ${client.id}`);
-    const callId = client.data.callId;
-    if (callId) {
-      this.voiceService.endSession(callId);
+    const adapter = this.adapters.get(client.id);
+    if (adapter) {
+      adapter.pushEndSession();
+      this.adapters.delete(client.id);
     }
   }
 
@@ -38,19 +43,13 @@ export class VoiceGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { callId: string }
   ) {
     const { callId } = data;
-    client.data.callId = callId;
     
-    await this.voiceService.startSession(
-      callId,
-      (audioBuffer: Buffer) => {
-        // Emit audio chunk to this specific client
-        client.emit('audio-chunk', audioBuffer);
-      },
-      (state: any) => {
-        // Emit state to this specific client
-        client.emit('voice-state', state);
-      }
-    );
+    // Create the Browser Transport Adapter for this client
+    const adapter = new BrowserTransportAdapter(client);
+    this.adapters.set(client.id, adapter);
+    
+    // Pass strictly the adapter to the generic Orchestrator
+    await this.voiceOrchestrator.attachTransport(callId, adapter);
     
     return { success: true };
   }
@@ -60,18 +59,18 @@ export class VoiceGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() chunk: Buffer
   ) {
-    const callId = client.data.callId;
-    if (callId) {
-      this.voiceService.handleAudioChunk(callId, chunk);
+    const adapter = this.adapters.get(client.id);
+    if (adapter) {
+      adapter.pushAudio(chunk);
     }
   }
 
   @SubscribeMessage('end-session')
   handleEndSession(@ConnectedSocket() client: Socket) {
-    const callId = client.data.callId;
-    if (callId) {
-      this.voiceService.endSession(callId);
-      client.data.callId = null;
+    const adapter = this.adapters.get(client.id);
+    if (adapter) {
+      adapter.pushEndSession();
+      this.adapters.delete(client.id);
     }
   }
 }

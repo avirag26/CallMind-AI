@@ -53,12 +53,6 @@ export class AiService {
             conversation = await this.prisma.conversation.create({
                 data: { callId },
             });
-            const prompt = await this.prisma.promptTemplate.findFirst({
-                where: { isActive: true },
-            });
-            const greeting = prompt?.content.match(/"([^"]+)"/)?.[1] || "Hello. Thank you for calling Cure & Wellness. Our doctors are currently unavailable. One of our doctors will call you within approximately 10 minutes. May I ask you a few questions?";
-
-            await this.saveAiMessage(callId, greeting, null, 'system', 'system');
         }
         return conversation;
     }

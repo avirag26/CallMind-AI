@@ -29,26 +29,10 @@ export class VoiceOrchestratorService {
 
     this.activeSessions.set(callId, { stt, isAiSpeaking: false });
 
-    // Fetch and speak the initial greeting
     try {
       await this.aiService.initializeConversation(callId);
-      const conversation = await this.aiService.getConversation(callId);
-      const initialGreeting = conversation?.messages?.find(m => m.speaker === 'system' || m.speaker === 'assistant');
-      
-      if (initialGreeting && initialGreeting.text) {
-        transport.sendState({ status: 'Speaking', aiResponse: initialGreeting.text });
-        
-        const session = this.activeSessions.get(callId);
-        if (session) session.isAiSpeaking = true;
-        
-        const audioBuffer = await this.ttsProvider.generateSpeech(initialGreeting.text);
-        
-        if (session && session.isAiSpeaking) {
-          transport.playAudio(audioBuffer);
-        }
-      }
     } catch (err) {
-      this.logger.error('Failed to speak initial greeting', err);
+      this.logger.error('Failed to initialize conversation', err);
     }
 
     const session = this.activeSessions.get(callId);

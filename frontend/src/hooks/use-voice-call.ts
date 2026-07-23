@@ -39,7 +39,8 @@ export function useVoiceCall(callId: string) {
       }
       const audioCtx = audioContextRef.current;
 
-      const socket = io('http://localhost:4000/voice');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+      const socket = io(`${apiUrl}/voice`);
       socketRef.current = socket;
 
       socket.on('connect', () => {

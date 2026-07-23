@@ -14,10 +14,7 @@ export class TwilioController {
     
     return `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-    <Say voice="alice">
-        Welcome to CallMind AI.
-        This is a test call.
-    </Say>
+    <!-- Handle Twilio routing here -->
 </Response>`;
   }
 }

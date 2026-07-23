@@ -19,14 +19,25 @@ export function useVoiceCall(callId: string) {
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const inputNodeRef = useRef<MediaStreamAudioSourceNode | null>(null);
 
+  // Must be called directly inside the onClick handler to satisfy browser gesture rules
+  const initAudio = useCallback(() => {
+    if (!audioContextRef.current) {
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioCtx.resume();
+      audioContextRef.current = audioCtx;
+    }
+  }, []);
+
   const connect = useCallback(async () => {
     try {
       setStatus('Connecting');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
       
-      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      audioContextRef.current = audioCtx;
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      const audioCtx = audioContextRef.current;
 
       const socket = io('http://localhost:4000/voice');
       socketRef.current = socket;
@@ -149,6 +160,7 @@ export function useVoiceCall(callId: string) {
     partial,
     patientState,
     isMuted,
+    initAudio,
     connect,
     disconnect,
     toggleMute

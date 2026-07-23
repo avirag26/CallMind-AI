@@ -14,12 +14,16 @@ export default function LiveVoiceCallPage() {
     partial, 
     patientState, 
     isMuted, 
+    initAudio,
     connect, 
     disconnect, 
     toggleMute 
   } = useVoiceCall(callId);
 
   const handleStart = async () => {
+    // 1. Initialize audio synchronously on user click to bypass browser autoplay blocks
+    initAudio();
+    
     setIsRinging(true);
     
     // Simulate phone ringing for 5 seconds

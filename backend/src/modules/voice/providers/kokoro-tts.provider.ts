@@ -29,7 +29,7 @@ export class KokoroTtsProvider implements ITextToSpeechProvider {
         {
           input: {
             text: text,
-            voice: "af", // default english female voice
+            voice: "af_bella", // explicitly female voice to prevent ambiguity
             speed: 1,
           }
         }
